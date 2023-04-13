@@ -8,6 +8,8 @@ use tray_icon::TrayEvent;
 use crate::ui::Message::{Backend, Ui, User};
 use crate::windows_ops;
 
+pub(crate) const APPLICATION_DISPLAY_NAME: &str = "no-hidden-extensions";
+
 // Notification of user input
 #[derive(Debug, Clone)]
 pub(crate) enum UserMessage {
@@ -86,7 +88,7 @@ impl Application for NoHiddenExtensionsState {
     }
 
     fn title(&self) -> String {
-        String::from("NoHiddenFiles")
+        String::from(APPLICATION_DISPLAY_NAME)
     }
 
     #[instrument]

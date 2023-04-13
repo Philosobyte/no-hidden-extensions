@@ -27,7 +27,7 @@ const WINDOWS_STARTUP_REGKEY_SUBPATH: &str = "Software\\Microsoft\\Windows\\Curr
 
 // The name of this application as it should be known by the Windows Registry.
 // Let's just use a hardcoded string to avoid multiple of this program from running at once.
-const THIS_APPLICATION_NAME: &str = "NoHiddenExtensions";
+const WINDOWS_STARTUP_VALUE_NAME: &str = "NoHiddenExtensions";
 
 // Checks whether the currently running program will run on Windows startup.
 // This is sensitive to the executable file being moved.
@@ -36,7 +36,7 @@ pub(crate) fn will_app_run_at_startup() -> Result<bool> {
     let hive: RegKey = RegKey::predef(HKEY_CURRENT_USER);
     let run_on_startup_key: RegKey = hive.open_subkey(WINDOWS_STARTUP_REGKEY_SUBPATH)?;
 
-    return match run_on_startup_key.get_value::<String, &str>(THIS_APPLICATION_NAME) {
+    return match run_on_startup_key.get_value::<String, &str>(WINDOWS_STARTUP_VALUE_NAME) {
         Ok(reg_value) => {
             let current_exe_path: PathBuf = std::env::current_exe()?;
 
@@ -55,7 +55,7 @@ pub(crate) fn will_app_run_at_startup() -> Result<bool> {
                 _ =>  Err(
                     err::RegistryOpsError::FailedToGetValueData {
                         key: String::from(WINDOWS_STARTUP_REGKEY_SUBPATH),
-                        value: String::from(THIS_APPLICATION_NAME),
+                        value: String::from(WINDOWS_STARTUP_VALUE_NAME),
                         source: error}.into()
                 )
             }
@@ -136,7 +136,7 @@ fn restart_windows_explorer() -> Result<()> {
 // This method returns whether a change was made.
 // Note that it is possible for Windows Explorer to be out of sync with the registry.
 #[instrument]
-pub fn turn_off_file_extension_hiding() -> Result<bool> {
+pub(crate) fn turn_off_file_extension_hiding() -> Result<bool> {
     let was_change_was_made: bool = set_or_update_registry_value(
         HKEY_CURRENT_USER,
         WINDOWS_EXPLORER_REGKEY_SUBPATH,
@@ -157,13 +157,13 @@ pub fn turn_off_file_extension_hiding() -> Result<bool> {
 // If the executable was moved, the registry value will be updated to reflect
 // the executable's new location.
 #[instrument]
-pub fn run_this_program_at_startup() -> Result<bool> {
+pub(crate) fn run_this_program_at_startup() -> Result<bool> {
     let current_executable_path: PathBuf = std::env::current_exe()?;
 
     set_or_update_registry_value(
         HKEY_CURRENT_USER,
         WINDOWS_STARTUP_REGKEY_SUBPATH,
-        THIS_APPLICATION_NAME,
+        WINDOWS_STARTUP_VALUE_NAME,
         current_executable_path.into_os_string()
     )
 }
@@ -171,7 +171,7 @@ pub fn run_this_program_at_startup() -> Result<bool> {
 // Deletes the registry value for this program so that it will not run on Windows startup.
 // This method returns whether a change was made.
 #[instrument]
-pub fn dont_run_this_program_at_startup() -> Result<bool> {
+pub(crate) fn dont_run_this_program_at_startup() -> Result<bool> {
     if !will_app_run_at_startup()? {
         trace!("Executable already will not run at startup anyway");
         return Ok(false);
@@ -181,7 +181,7 @@ pub fn dont_run_this_program_at_startup() -> Result<bool> {
     let run_on_startup_key: RegKey = hive.open_subkey_with_flags(
         WINDOWS_STARTUP_REGKEY_SUBPATH, KEY_QUERY_VALUE | KEY_SET_VALUE
     )?;
-    run_on_startup_key.delete_value(THIS_APPLICATION_NAME)?;
+    run_on_startup_key.delete_value(WINDOWS_STARTUP_VALUE_NAME)?;
     Ok(true)
 }
 
@@ -229,7 +229,7 @@ where
 }
 
 // Block until any value under the Windows Explorer Advanced registry key changes
-pub fn wait_for_any_change_in_windows_explorer_regkey() -> Result<()> {
+pub(crate) fn wait_for_any_change_in_windows_explorer_regkey() -> Result<()> {
     let outer_key: RegKey = RegKey::predef(HKEY_CURRENT_USER);
     let subkey: RegKey = outer_key.open_subkey(WINDOWS_EXPLORER_REGKEY_SUBPATH)?;
 

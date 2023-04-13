@@ -7,7 +7,7 @@ It runs at startup and stays minimized to the system tray. When something turns 
 `no-hidden-extensions` pops up and notifies the user, allowing you to turn file extension hiding back off.
 
 <img src="https://i.postimg.cc/6QBBk4Bw/no-hidden-files-screenshot-extensions-hidden.png" width="475" />
-<img src="https://i.postimg.cc/5tpfb9tz/no-hidden-files-screenshot-extensions-visible.png" width="475"/>
+<img src="https://i.postimg.cc/5tpfb9tz/no-hidden-files-screenshot-extensions-visible.png" width="475" />
 
 # Typical Usage
 1. Download the executable and verify its hash.

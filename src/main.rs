@@ -49,7 +49,7 @@ pub fn main() -> Result<()> {
         .map_err(|bad_icon| IconLoadingError::FailedToConstructTrayIcon(Box::new(bad_icon)))?;
 
     let _tray_ic: TrayIcon = TrayIconBuilder::new()
-        .with_tooltip("no-hidden-files")
+        .with_tooltip(APPLICATION_DISPLAY_NAME)
         .with_icon(tray_ic)
         .build()
         .map_err(|error| IconLoadingError::FailedToConstructTrayIcon(Box::new(error)))?;

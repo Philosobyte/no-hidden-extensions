@@ -1,0 +1,40 @@
+[package]
+authors = ["Raymond Liu"]
+name = "no-hidden-extensions"
+version = "0.1.0"
+edition = "2021"
+description = "Windows application to make sure file extensions stay hidden"
+
+[dependencies]
+anyhow = "1.0.70"
+clap = { version = "4.2.1", features = ["derive"] }
+dark-light = "1.0.0"
+iced = "0.8.0"
+image = "0.24.6"
+thiserror = "1.0.40"
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
+tray-icon = "0.4.4"
+
+[build-dependencies]
+embed-resource = "2.1.1"
+
+# this version of winreg supports notifications when registry keys change
+[dependencies.winreg]
+git = "https://github.com/Philosobyte/winreg-rs.git"
+rev = "34ee52f1b916d08ec1af0ecb78d871a4aa3c207c"
+features = ["transactions"]
+
+[dependencies.windows-sys]
+version = "0.45.0"
+features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_System_Com",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_ProcessStatus",
+    "Win32_System_LibraryLoader",
+]
