@@ -1,7 +1,5 @@
-use std::ptr::null;
-
-use anyhow::Result;
 use iced::{Alignment, Application, Command, Element, executor, Length, subscription, Subscription, Theme, window};
+use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, checkbox, column, container, text, Text};
 use iced::window::{Event, Mode, UserAttention};
 use tracing::{instrument, trace};
@@ -148,15 +146,15 @@ impl Application for NoHiddenExtensionsState {
     fn view(&self) -> Element<Message> {
         let body_text: Text = match self.file_extensions_hidden {
             true => text(
-                "Warning: File extensions are hidden in Windows Explorer, which means you have a higher risk \
-                 of falling for a phishing attack! Please change your Windows Explorer settings to stop hiding \
-                 file extensions. Or click the button below so we can change it for you."
+                "Warning - file extensions are hidden in Windows Explorer. This means a higher risk \
+                 of falling for a phishing attack."
             ),
             false => text(
                 "File extensions are visible in Windows Explorer, which is great! \
                  It is harder for you to fall for a phishing attack."
             )
-        };
+        }.horizontal_alignment(Horizontal::Center)
+        .vertical_alignment(Vertical::Center);
 
         let stop_hiding_file_extensions_button = match self.file_extensions_hidden {
             true => button("Stop hiding file extensions and restart Windows Explorer").on_press(User(UserMessage::HideFileExtensions)),
@@ -207,7 +205,7 @@ impl Application for NoHiddenExtensionsState {
                     }
                 }
             ),
-            subscription::events_with(|event, status|
+            subscription::events_with(|event, _status|
                 match event {
                     iced::Event::Window(window_event) => {
                         match window_event {

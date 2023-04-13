@@ -29,9 +29,6 @@ const WINDOWS_STARTUP_REGKEY_SUBPATH: &str = "Software\\Microsoft\\Windows\\Curr
 // Let's just use a hardcoded string to avoid multiple of this program from running at once.
 const THIS_APPLICATION_NAME: &str = "NoHiddenExtensions";
 
-// The name of the Windows Explorer process
-const WIN_EXPLORER_PROCESS_NAME: &str = "explorer.exe";
-
 // Checks whether the currently running program will run on Windows startup.
 // This is sensitive to the executable file being moved.
 #[instrument]

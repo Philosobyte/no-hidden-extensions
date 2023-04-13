@@ -1,5 +1,4 @@
 use thiserror::Error;
-use tray_icon::icon::BadIcon;
 
 #[derive(Error, Debug)]
 #[error("The current executable path could not be converted into a UTF-8 string")]
