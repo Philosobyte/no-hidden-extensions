@@ -190,46 +190,59 @@ impl Application for NoHiddenExtensionsState {
     #[instrument]
     fn subscription(&self) -> Subscription<Message> {
         return Subscription::batch(vec![
-            subscription::unfold(
-                std::any::TypeId::of::<BackendMessage>(),
-                0,
-                |_| async {
-                    trace!("Waiting for a change in the Windows Explorer registry key");
-                    windows_ops::wait_for_any_change_in_windows_explorer_regkey()
-                        .expect("Failed to wait for a change in the Windows Explorer Advanced registry key");
-                    trace!("Received a change in the Windows Explorer registry key");
+            get_listener_for_backend_messages(),
+            get_listener_for_ui_messages(),
+            get_listener_for_window_resize_messages(),
+        ]);
+    }
+}
 
-                    match windows_ops::are_file_extensions_hidden().expect("Failed to check whether file extensions are currently being hidden") {
-                        true => (Some(Backend(BackendMessage::FileExtensionsAreNowHidden)), 0),
-                        false => (Some(Backend(BackendMessage::FileExtensionsAreNoLongerHidden)), 0)
-                    }
-                }
-            ),
-            subscription::events_with(|event, _status|
-                match event {
-                    iced::Event::Window(window_event) => {
-                        match window_event {
-                            // these are typical values when user clicks on the minimize button
-                            Event::Resized {width: 0, height: 0} => {
-                                Some(Ui(UiMessage::MinimizeToTray))
-                            },
-                            _ => None
-                        }
+fn get_listener_for_backend_messages() -> Subscription<Message> {
+    subscription::unfold(
+        std::any::TypeId::of::<BackendMessage>(),
+        0,
+        |_| async {
+            trace!("Waiting for a change in the Windows Explorer registry key");
+            windows_ops::wait_for_any_change_in_windows_explorer_regkey()
+                .expect("Failed to wait for a change in the Windows Explorer Advanced registry key");
+            trace!("Received a change in the Windows Explorer registry key");
+
+            match windows_ops::are_file_extensions_hidden().expect("Failed to check whether file extensions are currently being hidden") {
+                true => (Some(Backend(BackendMessage::FileExtensionsAreNowHidden)), 0),
+                false => (Some(Backend(BackendMessage::FileExtensionsAreNoLongerHidden)), 0)
+            }
+        }
+    )
+}
+
+fn get_listener_for_ui_messages() -> Subscription<Message> {
+    subscription::events_with(|event, _status|
+        match event {
+            iced::Event::Window(window_event) => {
+                match window_event {
+                    // these are typical values when user clicks on the minimize button
+                    Event::Resized {width: 0, height: 0} => {
+                        Some(Ui(UiMessage::MinimizeToTray))
                     },
                     _ => None
                 }
-            ),
-            subscription::unfold(
-                std::any::TypeId::of::<UiMessage>(),
-                0,
-                 |_| async {
-                     let _: TrayEvent = TrayEvent::receiver().recv()
-                         .expect("Unable to listen for tray events");
-                     // We don't have a menu, so allow any tray event to restore the window
-                     (Some(Ui(UiMessage::RestoreFromTray)), 0)
-                 })
-        ]);
-    }
+            },
+            _ => None
+        }
+    )
+}
+
+fn get_listener_for_window_resize_messages() -> Subscription<Message> {
+    subscription::unfold(
+        std::any::TypeId::of::<UiMessage>(),
+        0,
+        |_| async {
+            let _: TrayEvent = TrayEvent::receiver().recv()
+                .expect("Unable to listen for tray events");
+            // We don't have a menu, so allow any tray event to restore the window
+            (Some(Ui(UiMessage::RestoreFromTray)), 0)
+        }
+    )
 }
 
 fn get_commands_which_notify_user() -> Command<Message> {

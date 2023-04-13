@@ -3,8 +3,9 @@
 use clap::{Parser, command, arg};
 use iced::{Application, Settings, Theme};
 use tray_icon::{TrayIcon, TrayIconBuilder};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use image::RgbaImage;
+use tracing::instrument;
 
 use crate::err::IconLoadingError;
 use crate::ui::{NoHiddenExtensionsState, UiOptions};
@@ -20,6 +21,7 @@ struct Args {
     start_minimized: bool,
 }
 
+#[instrument]
 fn load_visual_data_for_tray_and_window_icon() -> Result<(Vec<u8>, u32, u32)> {
     // embed bytes into the executable at compile-time
     let image_bytes = include_bytes!("..\\resources\\tray_and_window_icon.png");
@@ -33,10 +35,16 @@ fn load_visual_data_for_tray_and_window_icon() -> Result<(Vec<u8>, u32, u32)> {
 }
 
 
-pub fn main() -> iced::Result {
+pub fn main() -> Result<()> {
+    // log to stdout
+    tracing_subscriber::fmt::fmt()
+        .try_init()
+        .map_err(|e| anyhow!(e))?;
+
     let (rgba, width, height) = load_visual_data_for_tray_and_window_icon()
         .map_err(|error| IconLoadingError::FailedToLoadIconBytes(error))?;
 
+    // add to the Windows system tray
     let tray_ic: tray_icon::icon::Icon = tray_icon::icon::Icon::from_rgba(rgba.clone(), width.clone(), height.clone())
         .map_err(|bad_icon| IconLoadingError::FailedToConstructTrayIcon(Box::new(bad_icon)))?;
 
@@ -46,7 +54,7 @@ pub fn main() -> iced::Result {
         .build()
         .map_err(|error| IconLoadingError::FailedToConstructTrayIcon(Box::new(error)))?;
 
-    let window_ic: iced::window::Icon = iced::window::Icon::from_rgba(rgba, width, height)
+    let main_window_ic: iced::window::Icon = iced::window::Icon::from_rgba(rgba, width, height)
         .map_err(|error| IconLoadingError::FailedToConstructWindowIcon(Box::new(error)))?;
 
     let theme: Theme = match dark_light::detect() {
@@ -63,8 +71,10 @@ pub fn main() -> iced::Result {
         }
     );
 
-    settings.window.icon = Some(window_ic);
+    settings.window.icon = Some(main_window_ic);
     settings.window.size = (475, 175);
     settings.window.visible = !executable_args.start_minimized;
+
     NoHiddenExtensionsState::run(settings)
+        .map_err(|e| anyhow!(e))
 }

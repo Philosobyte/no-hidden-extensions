@@ -33,9 +33,3 @@ pub enum IconLoadingError {
     #[error("Failed to construct this program's window icon")]
     FailedToConstructWindowIcon(#[source] Box<dyn std::error::Error + Send + Sync>)
 }
-
-impl From<IconLoadingError> for iced::Error {
-    fn from(value: IconLoadingError) -> Self {
-        iced::Error::WindowCreationFailed(Box::new(value))
-    }
-}
