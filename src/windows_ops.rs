@@ -49,7 +49,7 @@ pub(crate) fn will_app_run_at_startup() -> Result<bool> {
         Err(error) => {
             match error.kind() {
                 ErrorKind::NotFound => {
-                    trace!("Found no windows startup registry value for {THIS_APPLICATION_NAME}");
+                    trace!("Found no windows startup registry value for {WINDOWS_STARTUP_VALUE_NAME}");
                     Ok(false)
                 },
                 _ =>  Err(

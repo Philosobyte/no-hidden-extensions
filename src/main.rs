@@ -8,7 +8,7 @@ use image::RgbaImage;
 use tracing::instrument;
 
 use crate::err::IconLoadingError;
-use crate::ui::{NoHiddenExtensionsState, UiOptions};
+use crate::ui::{APPLICATION_DISPLAY_NAME, NoHiddenExtensionsState, UiOptions};
 
 mod windows_ops;
 mod ui;
