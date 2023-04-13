@@ -10,7 +10,7 @@ It runs at startup and stays minimized to the system tray. When something turns 
 <img src="https://i.postimg.cc/5tpfb9tz/no-hidden-files-screenshot-extensions-visible.png" width="475" />
 
 # Typical Usage
-1. Download the executable and verify its hash.
+1. Download the executable and verify its checksum.
 2. Open the executable.
 3. Check the "Run at Windows startup" box.
 4. If the "Stop hiding file extensions and restart Windows Explorer" button is not greyed out, click it.
